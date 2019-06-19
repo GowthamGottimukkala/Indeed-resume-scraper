@@ -11,21 +11,22 @@ import html5lib
 # For now this scraper collects 250 resumes per field. You can increase it by changing the range in line-38
 
 # Fill this list with the fields
-myfields = ["dot net"]
-count = 0
+myfields = ["python","java","dot net"]
 baseurl = "https://resumes.indeed.com/"
 driver = webdriver.Chrome()
 driver.get(baseurl)
-for field in myfields:
+for ele,field in enumerate(myfields):
+    count = 0
     myfield = driver.find_element_by_xpath('//*[@id="input-q"]')
     myfield.send_keys(Keys.CONTROL + "a")
     myfield.send_keys(Keys.DELETE)
     myfield.send_keys(field)
-    if count == 0:               
+    if ele == 0:               
         driver.find_element_by_xpath('//*[@id="content"]/div/div[2]/div/div[1]/div[2]/div/form/div[3]/button').click()
     else:
         driver.find_element_by_xpath('//*[@id="content"]/div/div[2]/div/div[2]/div[1]/div[1]/div/form/div[3]/button').click()
-        
+    
+    # For reCaptcha - Indeed is asking only once(for one field)
     try:
         element = WebDriverWait(driver, 180).until(
             EC.presence_of_element_located((By.XPATH, '//*[@id="content"]/div/div[2]/div/div[2]/div[2]/div[1]/div/div[1]/span[1]/a'))
@@ -35,13 +36,15 @@ for field in myfields:
         soup = BeautifulSoup(html, 'html5lib')
         pages = soup.find('div',{'class':'rezemp-ResumeSearchPage-Pagination icl-Grid-col icl-u-xs-span12 icl-u-md-span7'})
         print(len(pages))
-        pagenum = 0
         for index in range(5):
             url = []
-            if pagenum == 0:
+            if index == 0:
                 pass
-            else:
-                driver.find_element_by_xpath('//*[@id="content"]/div/div[2]/div/div[2]/div[5]/span[{}]/span'.format(pagenum)).click()
+            elif index == 1:
+                driver.find_element_by_xpath('//*[@id="content"]/div/div[2]/div/div[2]/div[5]/span[14]').click()
+            else:  
+                driver.find_element_by_xpath('//*[@id="content"]/div/div[2]/div/div[2]/div[5]/span[15]').click()
+
             for link in soup.find('div',{'class':'icl-Grid-col icl-u-xs-span12 icl-u-md-span7 icl-Body'}):
                 url.append(link)
             for i in range(1,len(url)+1):
@@ -54,10 +57,6 @@ for field in myfields:
                 with open("Resumes/{0}-{1}.txt".format(field,i+count),"w") as textfile:
                     textfile.write(mytext)
                 driver.close()
-                driver.switch_to_window(window_before)
-            if pagenum == 3 or pagenum == 0:
-                pagenum += 3
-            else:
-                pagenum += 2
+                driver.switch_to_window(window_before)  
             count += len(url)
 driver.close()
