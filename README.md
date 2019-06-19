@@ -1,5 +1,5 @@
 # Indeed-resume-scraper
-Used ```Selenium``` and ```Beautiful Soup``` to collect resumes from Indeed
+Used ```Selenium``` and ```Beautiful Soup``` to collect resumes based on the given field from Indeed
 ## How to
 - Install the requirements using  
   
