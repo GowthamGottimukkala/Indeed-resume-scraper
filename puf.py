@@ -8,7 +8,7 @@ import html5lib
 
 # NOTES
 # You have to solve a reCaptcha to enter the site at the first
-# For now this scraper collects 250 resumes per field. You can increase it by changing the range in line-38
+# In this code the scraper collects 250 resumes per field. You can increase it by changing the range in line-40
 
 # Fill this list with the fields
 myfields = ["python","java","dot net"]
@@ -28,6 +28,7 @@ for ele,field in enumerate(myfields):
     
     # For reCaptcha - Indeed is asking only once(for one field)
     try:
+        # this waits for 180sec or until the presence of given element is detected
         element = WebDriverWait(driver, 180).until(
             EC.presence_of_element_located((By.XPATH, '//*[@id="content"]/div/div[2]/div/div[2]/div[2]/div[1]/div/div[1]/span[1]/a'))
         )
@@ -37,7 +38,7 @@ for ele,field in enumerate(myfields):
         pages = soup.find('div',{'class':'rezemp-ResumeSearchPage-Pagination icl-Grid-col icl-u-xs-span12 icl-u-md-span7'})
         print(len(pages))
         for index in range(5):
-            url = []
+            divs = []
             if index == 0:
                 pass
             elif index == 1:
@@ -45,9 +46,9 @@ for ele,field in enumerate(myfields):
             else:  
                 driver.find_element_by_xpath('//*[@id="content"]/div/div[2]/div/div[2]/div[5]/span[15]').click()
 
-            for link in soup.find('div',{'class':'icl-Grid-col icl-u-xs-span12 icl-u-md-span7 icl-Body'}):
-                url.append(link)
-            for i in range(1,len(url)+1):
+            for div in soup.find('div',{'class':'icl-Grid-col icl-u-xs-span12 icl-u-md-span7 icl-Body'}):
+                divs.append(div)
+            for i in range(1,len(divs)+1):
                 window_before = driver.window_handles[0]
                 driver.find_element_by_xpath('//*[@id="content"]/div/div[2]/div/div[2]/div[2]/div[{}]/div/div[1]/span[1]/a'.format(i)).click()
                 window_after = driver.window_handles[1]
@@ -58,5 +59,7 @@ for ele,field in enumerate(myfields):
                     textfile.write(mytext)
                 driver.close()
                 driver.switch_to_window(window_before)  
-            count += len(url)
+            count += len(divs)
+
+# This line closes the head-less browser that is opened
 driver.close()
